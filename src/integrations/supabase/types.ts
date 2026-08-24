@@ -14,16 +14,368 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      albums: {
+        Row: {
+          cover_photo_id: string | null
+          created_at: string
+          created_by: string | null
+          description: string | null
+          event_date: string | null
+          id: string
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          cover_photo_id?: string | null
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          event_date?: string | null
+          id?: string
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          cover_photo_id?: string | null
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          event_date?: string | null
+          id?: string
+          title?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "albums_cover_photo_fk"
+            columns: ["cover_photo_id"]
+            isOneToOne: false
+            referencedRelation: "photos"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      face_search_matches: {
+        Row: {
+          created_at: string
+          id: string
+          photo_id: string
+          search_id: string
+          similarity: number
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          photo_id: string
+          search_id: string
+          similarity?: number
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          photo_id?: string
+          search_id?: string
+          similarity?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "face_search_matches_photo_id_fkey"
+            columns: ["photo_id"]
+            isOneToOne: false
+            referencedRelation: "photos"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "face_search_matches_search_id_fkey"
+            columns: ["search_id"]
+            isOneToOne: false
+            referencedRelation: "face_searches"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      face_searches: {
+        Row: {
+          completed_at: string | null
+          created_at: string
+          error_message: string | null
+          expires_at: string
+          id: string
+          provider: string | null
+          requester_id: string
+          selfie_path: string
+          status: Database["public"]["Enums"]["search_status"]
+        }
+        Insert: {
+          completed_at?: string | null
+          created_at?: string
+          error_message?: string | null
+          expires_at?: string
+          id?: string
+          provider?: string | null
+          requester_id: string
+          selfie_path: string
+          status?: Database["public"]["Enums"]["search_status"]
+        }
+        Update: {
+          completed_at?: string | null
+          created_at?: string
+          error_message?: string | null
+          expires_at?: string
+          id?: string
+          provider?: string | null
+          requester_id?: string
+          selfie_path?: string
+          status?: Database["public"]["Enums"]["search_status"]
+        }
+        Relationships: []
+      }
+      photo_faces: {
+        Row: {
+          bounding_box: Json | null
+          created_at: string
+          detection_confidence: number | null
+          embedding: Json | null
+          external_face_id: string | null
+          id: string
+          photo_id: string
+          provider: string
+        }
+        Insert: {
+          bounding_box?: Json | null
+          created_at?: string
+          detection_confidence?: number | null
+          embedding?: Json | null
+          external_face_id?: string | null
+          id?: string
+          photo_id: string
+          provider?: string
+        }
+        Update: {
+          bounding_box?: Json | null
+          created_at?: string
+          detection_confidence?: number | null
+          embedding?: Json | null
+          external_face_id?: string | null
+          id?: string
+          photo_id?: string
+          provider?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "photo_faces_photo_id_fkey"
+            columns: ["photo_id"]
+            isOneToOne: false
+            referencedRelation: "photos"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      photos: {
+        Row: {
+          album_id: string | null
+          caption: string | null
+          checksum: string | null
+          created_at: string
+          face_index_status: Database["public"]["Enums"]["face_index_status"]
+          file_name: string
+          height: number | null
+          id: string
+          library: Database["public"]["Enums"]["photo_library"]
+          mime_type: string
+          original_path: string
+          preview_path: string | null
+          size_bytes: number
+          taken_at: string | null
+          thumbnail_path: string | null
+          updated_at: string
+          upload_status: Database["public"]["Enums"]["upload_status"]
+          uploader_id: string
+          width: number | null
+        }
+        Insert: {
+          album_id?: string | null
+          caption?: string | null
+          checksum?: string | null
+          created_at?: string
+          face_index_status?: Database["public"]["Enums"]["face_index_status"]
+          file_name: string
+          height?: number | null
+          id?: string
+          library?: Database["public"]["Enums"]["photo_library"]
+          mime_type?: string
+          original_path: string
+          preview_path?: string | null
+          size_bytes?: number
+          taken_at?: string | null
+          thumbnail_path?: string | null
+          updated_at?: string
+          upload_status?: Database["public"]["Enums"]["upload_status"]
+          uploader_id: string
+          width?: number | null
+        }
+        Update: {
+          album_id?: string | null
+          caption?: string | null
+          checksum?: string | null
+          created_at?: string
+          face_index_status?: Database["public"]["Enums"]["face_index_status"]
+          file_name?: string
+          height?: number | null
+          id?: string
+          library?: Database["public"]["Enums"]["photo_library"]
+          mime_type?: string
+          original_path?: string
+          preview_path?: string | null
+          size_bytes?: number
+          taken_at?: string | null
+          thumbnail_path?: string | null
+          updated_at?: string
+          upload_status?: Database["public"]["Enums"]["upload_status"]
+          uploader_id?: string
+          width?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "photos_album_id_fkey"
+            columns: ["album_id"]
+            isOneToOne: false
+            referencedRelation: "albums"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      profiles: {
+        Row: {
+          avatar_url: string | null
+          created_at: string
+          display_name: string
+          id: string
+          updated_at: string
+        }
+        Insert: {
+          avatar_url?: string | null
+          created_at?: string
+          display_name?: string
+          id: string
+          updated_at?: string
+        }
+        Update: {
+          avatar_url?: string | null
+          created_at?: string
+          display_name?: string
+          id?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      upload_sessions: {
+        Row: {
+          album_id: string | null
+          bytes_uploaded: number
+          checksum: string | null
+          created_at: string
+          error_message: string | null
+          file_name: string
+          id: string
+          library: Database["public"]["Enums"]["photo_library"]
+          mime_type: string
+          resume_url: string | null
+          size_bytes: number
+          status: Database["public"]["Enums"]["upload_status"]
+          storage_path: string
+          updated_at: string
+          uploader_id: string
+        }
+        Insert: {
+          album_id?: string | null
+          bytes_uploaded?: number
+          checksum?: string | null
+          created_at?: string
+          error_message?: string | null
+          file_name: string
+          id?: string
+          library?: Database["public"]["Enums"]["photo_library"]
+          mime_type?: string
+          resume_url?: string | null
+          size_bytes?: number
+          status?: Database["public"]["Enums"]["upload_status"]
+          storage_path: string
+          updated_at?: string
+          uploader_id: string
+        }
+        Update: {
+          album_id?: string | null
+          bytes_uploaded?: number
+          checksum?: string | null
+          created_at?: string
+          error_message?: string | null
+          file_name?: string
+          id?: string
+          library?: Database["public"]["Enums"]["photo_library"]
+          mime_type?: string
+          resume_url?: string | null
+          size_bytes?: number
+          status?: Database["public"]["Enums"]["upload_status"]
+          storage_path?: string
+          updated_at?: string
+          uploader_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "upload_sessions_album_id_fkey"
+            columns: ["album_id"]
+            isOneToOne: false
+            referencedRelation: "albums"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      user_roles: {
+        Row: {
+          created_at: string
+          id: string
+          role: Database["public"]["Enums"]["app_role"]
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          role: Database["public"]["Enums"]["app_role"]
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          role?: Database["public"]["Enums"]["app_role"]
+          user_id?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      has_role: {
+        Args: {
+          _role: Database["public"]["Enums"]["app_role"]
+          _user_id: string
+        }
+        Returns: boolean
+      }
     }
     Enums: {
-      [_ in never]: never
+      app_role: "admin" | "family"
+      face_index_status:
+        | "pending"
+        | "processing"
+        | "indexed"
+        | "failed"
+        | "skipped"
+      photo_library: "main" | "contribution"
+      search_status: "pending" | "processing" | "complete" | "failed"
+      upload_status: "pending" | "uploading" | "complete" | "failed"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -150,6 +502,18 @@ export type CompositeTypes<
 
 export const Constants = {
   public: {
-    Enums: {},
+    Enums: {
+      app_role: ["admin", "family"],
+      face_index_status: [
+        "pending",
+        "processing",
+        "indexed",
+        "failed",
+        "skipped",
+      ],
+      photo_library: ["main", "contribution"],
+      search_status: ["pending", "processing", "complete", "failed"],
+      upload_status: ["pending", "uploading", "complete", "failed"],
+    },
   },
 } as const
