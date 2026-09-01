@@ -28,7 +28,7 @@ export async function uploadResumable(opts: {
   await new Promise<void>((resolve, reject) => {
     const upload = new tus.Upload(opts.file, {
       endpoint: RESUMABLE_ENDPOINT,
-      uploadUrl: opts.resumeUrl ?? undefined,
+      uploadUrl: opts.resumeUrl ?? null,
       retryDelays: [0, 1000, 3000, 6000, 12000],
       headers: {
         authorization: `Bearer ${token}`,
