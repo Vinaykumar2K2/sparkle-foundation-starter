@@ -13,7 +13,7 @@ export type QueueItem = {
   size: number;
   uploaded: number;
   status: QueueStatus;
-  error?: string;
+  error?: string | undefined;
   sessionId?: string;
   resumeUrl?: string | null;
 };
