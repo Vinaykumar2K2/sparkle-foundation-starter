@@ -55,127 +55,12 @@ export type Database = {
           },
         ]
       }
-      face_search_matches: {
-        Row: {
-          created_at: string
-          id: string
-          photo_id: string
-          search_id: string
-          similarity: number
-        }
-        Insert: {
-          created_at?: string
-          id?: string
-          photo_id: string
-          search_id: string
-          similarity?: number
-        }
-        Update: {
-          created_at?: string
-          id?: string
-          photo_id?: string
-          search_id?: string
-          similarity?: number
-        }
-        Relationships: [
-          {
-            foreignKeyName: "face_search_matches_photo_id_fkey"
-            columns: ["photo_id"]
-            isOneToOne: false
-            referencedRelation: "photos"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "face_search_matches_search_id_fkey"
-            columns: ["search_id"]
-            isOneToOne: false
-            referencedRelation: "face_searches"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      face_searches: {
-        Row: {
-          completed_at: string | null
-          created_at: string
-          error_message: string | null
-          expires_at: string
-          id: string
-          provider: string | null
-          requester_id: string
-          selfie_path: string
-          status: Database["public"]["Enums"]["search_status"]
-        }
-        Insert: {
-          completed_at?: string | null
-          created_at?: string
-          error_message?: string | null
-          expires_at?: string
-          id?: string
-          provider?: string | null
-          requester_id: string
-          selfie_path: string
-          status?: Database["public"]["Enums"]["search_status"]
-        }
-        Update: {
-          completed_at?: string | null
-          created_at?: string
-          error_message?: string | null
-          expires_at?: string
-          id?: string
-          provider?: string | null
-          requester_id?: string
-          selfie_path?: string
-          status?: Database["public"]["Enums"]["search_status"]
-        }
-        Relationships: []
-      }
-      photo_faces: {
-        Row: {
-          bounding_box: Json | null
-          created_at: string
-          detection_confidence: number | null
-          embedding: Json | null
-          external_face_id: string | null
-          id: string
-          photo_id: string
-          provider: string
-        }
-        Insert: {
-          bounding_box?: Json | null
-          created_at?: string
-          detection_confidence?: number | null
-          embedding?: Json | null
-          external_face_id?: string | null
-          id?: string
-          photo_id: string
-          provider?: string
-        }
-        Update: {
-          bounding_box?: Json | null
-          created_at?: string
-          detection_confidence?: number | null
-          embedding?: Json | null
-          external_face_id?: string | null
-          id?: string
-          photo_id?: string
-          provider?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "photo_faces_photo_id_fkey"
-            columns: ["photo_id"]
-            isOneToOne: false
-            referencedRelation: "photos"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
       photos: {
         Row: {
           album_id: string | null
           caption: string | null
           checksum: string | null
+          contributor_name: string | null
           created_at: string
           face_index_status: Database["public"]["Enums"]["face_index_status"]
           file_name: string
@@ -190,13 +75,14 @@ export type Database = {
           thumbnail_path: string | null
           updated_at: string
           upload_status: Database["public"]["Enums"]["upload_status"]
-          uploader_id: string
+          uploader_id: string | null
           width: number | null
         }
         Insert: {
           album_id?: string | null
           caption?: string | null
           checksum?: string | null
+          contributor_name?: string | null
           created_at?: string
           face_index_status?: Database["public"]["Enums"]["face_index_status"]
           file_name: string
@@ -211,13 +97,14 @@ export type Database = {
           thumbnail_path?: string | null
           updated_at?: string
           upload_status?: Database["public"]["Enums"]["upload_status"]
-          uploader_id: string
+          uploader_id?: string | null
           width?: number | null
         }
         Update: {
           album_id?: string | null
           caption?: string | null
           checksum?: string | null
+          contributor_name?: string | null
           created_at?: string
           face_index_status?: Database["public"]["Enums"]["face_index_status"]
           file_name?: string
@@ -232,7 +119,7 @@ export type Database = {
           thumbnail_path?: string | null
           updated_at?: string
           upload_status?: Database["public"]["Enums"]["upload_status"]
-          uploader_id?: string
+          uploader_id?: string | null
           width?: number | null
         }
         Relationships: [
@@ -285,7 +172,7 @@ export type Database = {
           status: Database["public"]["Enums"]["upload_status"]
           storage_path: string
           updated_at: string
-          uploader_id: string
+          uploader_id: string | null
         }
         Insert: {
           album_id?: string | null
@@ -302,7 +189,7 @@ export type Database = {
           status?: Database["public"]["Enums"]["upload_status"]
           storage_path: string
           updated_at?: string
-          uploader_id: string
+          uploader_id?: string | null
         }
         Update: {
           album_id?: string | null
@@ -319,7 +206,7 @@ export type Database = {
           status?: Database["public"]["Enums"]["upload_status"]
           storage_path?: string
           updated_at?: string
-          uploader_id?: string
+          uploader_id?: string | null
         }
         Relationships: [
           {
