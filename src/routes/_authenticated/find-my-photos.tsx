@@ -28,7 +28,7 @@ export const Route = createFileRoute("/_authenticated/find-my-photos")({
       { name: "twitter:card", content: "summary_large_image" },
     ],
   }),
-  component: FindMyPhotos;
+  component: FindMyPhotos,
 });
 
 type Match = { photo: PhotoRecord; similarity: number };
