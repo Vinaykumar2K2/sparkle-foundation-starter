@@ -14,6 +14,7 @@ import { Route as AuthenticatedRouteRouteImport } from './routes/_authenticated/
 import { Route as AuthRouteImport } from './routes/auth'
 import { Route as AuthenticatedContributionsRouteImport } from './routes/_authenticated/contributions'
 import { Route as AuthenticatedDashboardRouteImport } from './routes/_authenticated/dashboard'
+import { Route as AuthenticatedFindMyPhotosRouteImport } from './routes/_authenticated/find-my-photos'
 import { Route as AuthenticatedPhotosRouteImport } from './routes/_authenticated/photos'
 import { Route as AuthenticatedUploadsRouteImport } from './routes/_authenticated/uploads'
 
@@ -42,6 +43,12 @@ const AuthenticatedDashboardRoute = AuthenticatedDashboardRouteImport.update({
   path: '/dashboard',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
+const AuthenticatedFindMyPhotosRoute =
+  AuthenticatedFindMyPhotosRouteImport.update({
+    id: '/find-my-photos',
+    path: '/find-my-photos',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
 const AuthenticatedPhotosRoute = AuthenticatedPhotosRouteImport.update({
   id: '/photos',
   path: '/photos',
@@ -58,6 +65,7 @@ export interface FileRoutesByFullPath {
   '/auth': typeof AuthRoute
   '/contributions': typeof AuthenticatedContributionsRoute
   '/dashboard': typeof AuthenticatedDashboardRoute
+  '/find-my-photos': typeof AuthenticatedFindMyPhotosRoute
   '/photos': typeof AuthenticatedPhotosRoute
   '/uploads': typeof AuthenticatedUploadsRoute
 }
@@ -66,6 +74,7 @@ export interface FileRoutesByTo {
   '/auth': typeof AuthRoute
   '/contributions': typeof AuthenticatedContributionsRoute
   '/dashboard': typeof AuthenticatedDashboardRoute
+  '/find-my-photos': typeof AuthenticatedFindMyPhotosRoute
   '/photos': typeof AuthenticatedPhotosRoute
   '/uploads': typeof AuthenticatedUploadsRoute
 }
@@ -76,15 +85,29 @@ export interface FileRoutesById {
   '/auth': typeof AuthRoute
   '/_authenticated/contributions': typeof AuthenticatedContributionsRoute
   '/_authenticated/dashboard': typeof AuthenticatedDashboardRoute
+  '/_authenticated/find-my-photos': typeof AuthenticatedFindMyPhotosRoute
   '/_authenticated/photos': typeof AuthenticatedPhotosRoute
   '/_authenticated/uploads': typeof AuthenticatedUploadsRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
-    '/' | '/auth' | '/contributions' | '/dashboard' | '/photos' | '/uploads'
+    | '/'
+    | '/auth'
+    | '/contributions'
+    | '/dashboard'
+    | '/find-my-photos'
+    | '/photos'
+    | '/uploads'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/auth' | '/contributions' | '/dashboard' | '/photos' | '/uploads'
+  to:
+    | '/'
+    | '/auth'
+    | '/contributions'
+    | '/dashboard'
+    | '/find-my-photos'
+    | '/photos'
+    | '/uploads'
   id:
     | '__root__'
     | '/'
@@ -92,6 +115,7 @@ export interface FileRouteTypes {
     | '/auth'
     | '/_authenticated/contributions'
     | '/_authenticated/dashboard'
+    | '/_authenticated/find-my-photos'
     | '/_authenticated/photos'
     | '/_authenticated/uploads'
   fileRoutesById: FileRoutesById
@@ -139,6 +163,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedDashboardRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/find-my-photos': {
+      id: '/_authenticated/find-my-photos'
+      path: '/find-my-photos'
+      fullPath: '/find-my-photos'
+      preLoaderRoute: typeof AuthenticatedFindMyPhotosRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/photos': {
       id: '/_authenticated/photos'
       path: '/photos'
@@ -159,6 +190,7 @@ declare module '@tanstack/react-router' {
 interface AuthenticatedRouteRouteChildren {
   AuthenticatedContributionsRoute: typeof AuthenticatedContributionsRoute
   AuthenticatedDashboardRoute: typeof AuthenticatedDashboardRoute
+  AuthenticatedFindMyPhotosRoute: typeof AuthenticatedFindMyPhotosRoute
   AuthenticatedPhotosRoute: typeof AuthenticatedPhotosRoute
   AuthenticatedUploadsRoute: typeof AuthenticatedUploadsRoute
 }
@@ -166,6 +198,7 @@ interface AuthenticatedRouteRouteChildren {
 const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedContributionsRoute: AuthenticatedContributionsRoute,
   AuthenticatedDashboardRoute: AuthenticatedDashboardRoute,
+  AuthenticatedFindMyPhotosRoute: AuthenticatedFindMyPhotosRoute,
   AuthenticatedPhotosRoute: AuthenticatedPhotosRoute,
   AuthenticatedUploadsRoute: AuthenticatedUploadsRoute,
 }
