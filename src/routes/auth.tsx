@@ -1,4 +1,4 @@
-import { createFileRoute, useNavigate } from "@tanstack/react-router";
+import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
@@ -10,11 +10,14 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 export const Route = createFileRoute("/auth")({
   head: () => ({
     meta: [
-      { title: "Sign in — Family Photo Hub" },
-      { name: "description", content: "Private sign-in for our family photo library." },
+      { title: "Admin sign in — Family Photo Hub" },
+      { name: "description", content: "Admin access for managing the family photo library." },
       { name: "robots", content: "noindex" },
-      { property: "og:title", content: "Sign in — Family Photo Hub" },
-      { property: "og:description", content: "Private sign-in for our family photo library." },
+      { property: "og:title", content: "Admin sign in — Family Photo Hub" },
+      {
+        property: "og:description",
+        content: "Admin access for managing the family photo library.",
+      },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
     ],
@@ -24,15 +27,13 @@ export const Route = createFileRoute("/auth")({
 
 function AuthPage() {
   const navigate = useNavigate();
-  const [mode, setMode] = useState<"signin" | "signup">("signin");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [displayName, setDisplayName] = useState("");
   const [busy, setBusy] = useState(false);
 
   useEffect(() => {
     void supabase.auth.getSession().then(({ data }) => {
-      if (data.session) navigate({ to: "/dashboard", replace: true });
+      if (data.session) navigate({ to: "/uploads", replace: true });
     });
   }, [navigate]);
 
@@ -40,25 +41,11 @@ function AuthPage() {
     e.preventDefault();
     setBusy(true);
     try {
-      if (mode === "signup") {
-        const { error } = await supabase.auth.signUp({
-          email,
-          password,
-          options: {
-            emailRedirectTo: `${window.location.origin}/dashboard`,
-            data: { display_name: displayName || email.split("@")[0] },
-          },
-        });
-        if (error) throw error;
-        toast.success("Account created. Check your inbox if confirmation is required.");
-      } else {
-        const { error } = await supabase.auth.signInWithPassword({ email, password });
-        if (error) throw error;
-      }
-      const { data } = await supabase.auth.getSession();
-      if (data.session) navigate({ to: "/dashboard", replace: true });
+      const { error } = await supabase.auth.signInWithPassword({ email, password });
+      if (error) throw error;
+      navigate({ to: "/uploads", replace: true });
     } catch (err) {
-      toast.error(err instanceof Error ? err.message : "Something went wrong");
+      toast.error(err instanceof Error ? err.message : "Could not sign in");
     } finally {
       setBusy(false);
     }
@@ -68,34 +55,22 @@ function AuthPage() {
     <main className="flex min-h-screen items-center justify-center bg-background px-5 py-12">
       <Card className="w-full max-w-md shadow-lift">
         <CardHeader className="space-y-2 text-center">
-          <CardTitle className="font-display text-2xl">Family Photo Hub</CardTitle>
+          <CardTitle className="font-display text-2xl">Admin sign in</CardTitle>
           <CardDescription>
-            A private space for our family memories. Invitation only.
+            Only the family album admin needs to sign in. Everyone else can browse freely.
           </CardDescription>
         </CardHeader>
         <CardContent>
           <form onSubmit={submit} className="space-y-4">
-            {mode === "signup" ? (
-              <div className="space-y-2">
-                <Label htmlFor="name">Your name</Label>
-                <Input
-                  id="name"
-                  value={displayName}
-                  onChange={(e) => setDisplayName(e.target.value)}
-                  placeholder="e.g. Anita"
-                  autoComplete="name"
-                />
-              </div>
-            ) : null}
             <div className="space-y-2">
-              <Label htmlFor="email">Email</Label>
+              <Label htmlFor="email">Admin ID</Label>
               <Input
                 id="email"
                 type="email"
                 required
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                autoComplete="email"
+                autoComplete="username"
               />
             </div>
             <div className="space-y-2">
@@ -104,25 +79,19 @@ function AuthPage() {
                 id="password"
                 type="password"
                 required
-                minLength={8}
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
-                autoComplete={mode === "signup" ? "new-password" : "current-password"}
+                autoComplete="current-password"
               />
             </div>
             <Button type="submit" className="w-full" disabled={busy}>
-              {busy ? "Please wait…" : mode === "signin" ? "Sign in" : "Create account"}
+              {busy ? "Please wait…" : "Sign in"}
             </Button>
           </form>
           <p className="mt-5 text-center text-sm text-muted-foreground">
-            {mode === "signin" ? "New to the hub?" : "Already have an account?"}{" "}
-            <button
-              type="button"
-              className="font-medium text-primary underline-offset-4 hover:underline"
-              onClick={() => setMode(mode === "signin" ? "signup" : "signin")}
-            >
-              {mode === "signin" ? "Create an account" : "Sign in"}
-            </button>
+            <Link to="/" className="font-medium text-primary underline-offset-4 hover:underline">
+              Back to the album
+            </Link>
           </p>
         </CardContent>
       </Card>
