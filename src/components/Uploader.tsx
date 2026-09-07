@@ -20,12 +20,18 @@ export function Uploader({
   library,
   albumId = null,
   allowFolders = false,
+  contributorName,
+  disabled = false,
+  disabledHint,
 }: {
   library: Library;
   albumId?: string | null;
   allowFolders?: boolean;
+  contributorName?: string;
+  disabled?: boolean;
+  disabledHint?: string;
 }) {
-  const queue = useUploadQueue(library);
+  const queue = useUploadQueue(library, contributorName);
   const queryClient = useQueryClient();
   const fileInput = useRef<HTMLInputElement>(null);
   const folderInput = useRef<HTMLInputElement>(null);
@@ -51,7 +57,7 @@ export function Uploader({
           setDragging(true);
         }}
         onDragLeave={() => setDragging(false)}
-        onDrop={onDrop}
+        onDrop={(e) => (disabled ? e.preventDefault() : onDrop(e))}
         className={cn(
           "rounded-2xl border-2 border-dashed border-border bg-card/60 p-10 text-center transition-colors",
           dragging && "border-primary bg-accent/40",
@@ -64,15 +70,18 @@ export function Uploader({
           and originals are stored exactly as they are.
         </p>
         <div className="mt-5 flex flex-wrap justify-center gap-2">
-          <Button variant="outline" onClick={() => fileInput.current?.click()}>
+          <Button variant="outline" disabled={disabled} onClick={() => fileInput.current?.click()}>
             <ImagePlus className="mr-2 size-4" /> Choose files
           </Button>
           {allowFolders ? (
-            <Button variant="outline" onClick={() => folderInput.current?.click()}>
+            <Button variant="outline" disabled={disabled} onClick={() => folderInput.current?.click()}>
               <FolderOpen className="mr-2 size-4" /> Choose folder
             </Button>
           ) : null}
         </div>
+        {disabled && disabledHint ? (
+          <p className="mt-3 text-sm text-destructive">{disabledHint}</p>
+        ) : null}
         <input
           ref={fileInput}
           type="file"

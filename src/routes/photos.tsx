@@ -1,18 +1,22 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useInfiniteQuery, useQuery } from "@tanstack/react-query";
+import { useInfiniteQuery, useQueryClient } from "@tanstack/react-query";
 import { useMemo, useState } from "react";
 import { Download, Loader2 } from "lucide-react";
+import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
-import { PageHeading } from "@/components/AppShell";
+import { AppShell, PageHeading } from "@/components/AppShell";
 import { PhotoGrid, type PhotoRecord } from "@/components/PhotoGrid";
 import { Lightbox } from "@/components/Lightbox";
 import { Button } from "@/components/ui/button";
 import { downloadMany, downloadOriginal } from "@/lib/storage";
+import { deletePhoto } from "@/lib/photoAdmin";
+import { useAlbums } from "@/lib/albums";
+import { useAuth } from "@/hooks/useAuth";
 import { cn } from "@/lib/utils";
 
 const PAGE_SIZE = 48;
 
-export const Route = createFileRoute("/_authenticated/photos")({
+export const Route = createFileRoute("/photos")({
   head: () => ({
     meta: [
       { title: "Main Photos — Family Photo Hub" },
@@ -30,25 +34,13 @@ export const Route = createFileRoute("/_authenticated/photos")({
   component: MainPhotos,
 });
 
-export function useAlbums() {
-  return useQuery({
-    queryKey: ["albums"],
-    queryFn: async () => {
-      const { data, error } = await supabase
-        .from("albums")
-        .select("id, title, event_date")
-        .order("event_date", { ascending: false, nullsFirst: false });
-      if (error) throw error;
-      return data;
-    },
-  });
-}
-
 function MainPhotos() {
   const [albumId, setAlbumId] = useState<string | null>(null);
   const [selected, setSelected] = useState<Set<string>>(new Set());
   const [openIndex, setOpenIndex] = useState<number | null>(null);
   const albums = useAlbums();
+  const { isAdmin } = useAuth();
+  const queryClient = useQueryClient();
 
   const query = useInfiniteQuery({
     queryKey: ["main-photos", albumId],
@@ -57,7 +49,7 @@ function MainPhotos() {
       let q = supabase
         .from("photos")
         .select(
-          "id, file_name, original_path, thumbnail_path, preview_path, width, height, size_bytes, caption, created_at, uploader_id",
+          "id, file_name, original_path, thumbnail_path, preview_path, width, height, size_bytes, caption, created_at, uploader_id, contributor_name",
         )
         .eq("library", "main")
         .eq("upload_status", "complete")
@@ -83,8 +75,20 @@ function MainPhotos() {
     });
   }
 
+  async function remove(photo: PhotoRecord) {
+    if (!window.confirm(`Delete “${photo.file_name}” permanently?`)) return;
+    try {
+      await deletePhoto(photo);
+      await queryClient.invalidateQueries({ queryKey: ["main-photos"] });
+      await queryClient.invalidateQueries({ queryKey: ["dashboard-stats"] });
+      toast.success("Photo deleted");
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : "Could not delete photo");
+    }
+  }
+
   return (
-    <>
+    <AppShell>
       <PageHeading
         title="Main Photos"
         description="Our official family library. Downloads always give you the untouched original file."
@@ -145,6 +149,7 @@ function MainPhotos() {
           onToggleSelect={toggle}
           onOpen={(p) => setOpenIndex(photos.findIndex((x) => x.id === p.id))}
           onDownload={(p) => void downloadOriginal(p.original_path, p.file_name)}
+          {...(isAdmin ? { onDelete: (p: PhotoRecord) => void remove(p) } : {})}
         />
       )}
 
@@ -169,6 +174,6 @@ function MainPhotos() {
           onIndexChange={setOpenIndex}
         />
       ) : null}
-    </>
+    </AppShell>
   );
 }
