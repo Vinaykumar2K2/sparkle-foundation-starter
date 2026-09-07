@@ -22,7 +22,7 @@ export type Library = "main" | "contribution";
 
 const CONCURRENCY = 3;
 
-export function useUploadQueue(library: Library) {
+export function useUploadQueue(library: Library, contributorName?: string) {
   const [items, setItems] = useState<QueueItem[]>([]);
   const [running, setRunning] = useState(false);
   const [startedAt, setStartedAt] = useState<number | null>(null);
@@ -52,12 +52,12 @@ export function useUploadQueue(library: Library) {
   const runItem = useCallback(
     async (item: QueueItem, albumId: string | null) => {
       const { data: userData } = await supabase.auth.getUser();
-      const userId = userData.user?.id;
-      if (!userId) throw new Error("Not signed in");
+      const userId = userData.user?.id ?? null;
+      if (library === "main" && !userId) throw new Error("Only the admin can upload here");
 
       const base = `${Date.now()}-${Math.random().toString(36).slice(2, 8)}-${safeFileName(item.file.name)}`;
       const storagePath =
-        library === "main" ? `main/${base}` : `contrib/${userId}/${base}`;
+        library === "main" ? `main/${base}` : `contrib/${userId ?? "guest"}/${base}`;
 
       patch(item.id, { status: "uploading", uploaded: 0 });
 
@@ -129,6 +129,7 @@ export function useUploadQueue(library: Library) {
 
       const { error: photoError } = await supabase.from("photos").insert({
         uploader_id: userId,
+        contributor_name: library === "contribution" ? (contributorName?.trim() || null) : null,
         album_id: albumId,
         library,
         file_name: item.file.name,
@@ -152,7 +153,7 @@ export function useUploadQueue(library: Library) {
 
       patch(item.id, { status: "done" });
     },
-    [library, patch],
+    [library, patch, contributorName],
   );
 
   const start = useCallback(

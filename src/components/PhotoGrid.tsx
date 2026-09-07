@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
-import { Check, Download, ImageOff } from "lucide-react";
+import { Check, Download, ImageOff, Trash2 } from "lucide-react";
 import { DERIVATIVES_BUCKET, signPaths } from "@/lib/storage";
 import { cn } from "@/lib/utils";
 
@@ -14,7 +14,8 @@ export type PhotoRecord = {
   size_bytes: number;
   caption?: string | null;
   created_at: string;
-  uploader_id: string;
+  uploader_id: string | null;
+  contributor_name?: string | null;
 };
 
 export function usePhotoUrls(photos: PhotoRecord[], key: "thumbnail_path" | "preview_path") {
@@ -46,12 +47,14 @@ export function PhotoGrid({
   onToggleSelect,
   onOpen,
   onDownload,
+  onDelete,
 }: {
   photos: PhotoRecord[];
   selected?: Set<string>;
   onToggleSelect?: (id: string) => void;
   onOpen: (photo: PhotoRecord) => void;
   onDownload?: (photo: PhotoRecord) => void;
+  onDelete?: (photo: PhotoRecord) => void;
 }) {
   const urls = usePhotoUrls(photos, "thumbnail_path");
 
@@ -105,16 +108,28 @@ export function PhotoGrid({
               ) : (
                 <span />
               )}
-              {onDownload ? (
-                <button
-                  type="button"
-                  onClick={() => onDownload(photo)}
-                  aria-label={`Download ${photo.file_name}`}
-                  className="pointer-events-auto grid size-7 place-items-center rounded-full bg-background/80 backdrop-blur"
-                >
-                  <Download className="size-3.5" />
-                </button>
-              ) : null}
+              <span className="flex items-center gap-1.5">
+                {onDelete ? (
+                  <button
+                    type="button"
+                    onClick={() => onDelete(photo)}
+                    aria-label={`Delete ${photo.file_name}`}
+                    className="pointer-events-auto grid size-7 place-items-center rounded-full bg-background/80 text-destructive backdrop-blur"
+                  >
+                    <Trash2 className="size-3.5" />
+                  </button>
+                ) : null}
+                {onDownload ? (
+                  <button
+                    type="button"
+                    onClick={() => onDownload(photo)}
+                    aria-label={`Download ${photo.file_name}`}
+                    className="pointer-events-auto grid size-7 place-items-center rounded-full bg-background/80 backdrop-blur"
+                  >
+                    <Download className="size-3.5" />
+                  </button>
+                ) : null}
+              </span>
             </div>
             {isSelected ? (
               <span className="absolute left-2 top-2 grid size-7 place-items-center rounded-full bg-primary text-primary-foreground">
