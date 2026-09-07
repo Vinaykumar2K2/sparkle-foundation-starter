@@ -1,17 +1,15 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { useServerFn } from "@tanstack/react-start";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { PageHeading } from "@/components/AppShell";
 import { Uploader } from "@/components/Uploader";
-import { useAlbums } from "@/routes/_authenticated/photos";
+import { useAlbums } from "@/lib/albums";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { queueFaceIndexing } from "@/lib/faceSearch.functions";
 import { cn } from "@/lib/utils";
 
 export const Route = createFileRoute("/_authenticated/uploads")({
@@ -40,10 +38,9 @@ function AdminUploads() {
   const [albumId, setAlbumId] = useState<string | null>(null);
   const [newAlbum, setNewAlbum] = useState("");
   const [eventDate, setEventDate] = useState("");
-  const indexFn = useServerFn(queueFaceIndexing);
 
   useEffect(() => {
-    if (!loading && !isAdmin) navigate({ to: "/dashboard", replace: true });
+    if (!loading && !isAdmin) navigate({ to: "/", replace: true });
   }, [loading, isAdmin, navigate]);
 
   const createAlbum = useMutation({
@@ -77,21 +74,6 @@ function AdminUploads() {
       <PageHeading
         title="Admin Uploads"
         description="Add photos to the official library. Files upload in 6 MB chunks so large batches survive interruptions."
-        action={
-          <Button
-            variant="outline"
-            onClick={async () => {
-              const res = await indexFn({});
-              toast.message(
-                res.configured
-                  ? `${res.pending} photos queued for face indexing.`
-                  : `${res.pending} photos are waiting — face matching provider is not configured yet.`,
-              );
-            }}
-          >
-            Queue face indexing
-          </Button>
-        }
       />
 
       <section className="mb-8 rounded-2xl border border-border/70 bg-card p-5 shadow-soft">
@@ -106,7 +88,7 @@ function AdminUploads() {
           >
             Unsorted
           </button>
-          {(albums.data ?? []).map((a) => (
+          {(albums.data ?? []).map((a: { id: string; title: string }) => (
             <button
               key={a.id}
               onClick={() => setAlbumId(a.id)}
