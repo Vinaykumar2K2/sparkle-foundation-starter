@@ -1,61 +1,127 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { useEffect } from "react";
-import { useNavigate } from "@tanstack/react-router";
+import { useQuery } from "@tanstack/react-query";
+import { Heart, Images, UploadCloud } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
+import { useAuth } from "@/hooks/useAuth";
+import { AppShell, PageHeading } from "@/components/AppShell";
+import { formatBytes } from "@/lib/format";
+import { Card, CardContent } from "@/components/ui/card";
 
 export const Route = createFileRoute("/")({
   head: () => ({
     meta: [
-      { title: "Family Photo Hub — Our private family album" },
+      { title: "Family Photo Hub — Our shared family album" },
       {
         name: "description",
-        content: "A private, family-only home for our photos, albums and memories.",
+        content: "Browse, download and share our family photos — all in original quality.",
       },
       { name: "robots", content: "noindex" },
-      { property: "og:title", content: "Family Photo Hub — Our private family album" },
+      { property: "og:title", content: "Family Photo Hub — Our shared family album" },
       {
         property: "og:description",
-        content: "A private, family-only home for our photos, albums and memories.",
+        content: "Browse, download and share our family photos — all in original quality.",
       },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
     ],
   }),
-  component: Landing,
+  component: HomePage,
 });
 
-function Landing() {
-  const navigate = useNavigate();
-
-  useEffect(() => {
-    let active = true;
-    void supabase.auth.getUser().then(({ data }) => {
-      if (active && data.user) navigate({ to: "/dashboard", replace: true });
-    });
-    return () => {
-      active = false;
-    };
-  }, [navigate]);
-
-  return (
-    <main className="flex min-h-screen flex-col items-center justify-center bg-background px-6 text-center">
-      <div className="max-w-lg space-y-6">
-        <p className="text-xs uppercase tracking-[0.25em] text-muted-foreground">Private · Family only</p>
-        <h1 className="font-display text-5xl font-semibold tracking-tight text-foreground">
-          Family Photo Hub
-        </h1>
-        <p className="text-base text-muted-foreground">
-          Every album, every celebration, every quiet moment — kept safely together for our
-          family, at full original quality.
-        </p>
-        <Link
-          to="/auth"
-          className="inline-flex items-center justify-center rounded-full bg-primary px-6 py-3 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90"
-        >
-          Sign in to the hub
-        </Link>
-      </div>
-    </main>
-  );
+function useStats() {
+  return useQuery({
+    queryKey: ["dashboard-stats"],
+    queryFn: async () => {
+      const [main, contrib, albums, sizes] = await Promise.all([
+        supabase.from("photos").select("id", { count: "exact", head: true }).eq("library", "main"),
+        supabase
+          .from("photos")
+          .select("id", { count: "exact", head: true })
+          .eq("library", "contribution"),
+        supabase.from("albums").select("id", { count: "exact", head: true }),
+        supabase.from("photos").select("size_bytes").limit(5000),
+      ]);
+      const bytes = (sizes.data ?? []).reduce((s, r) => s + Number(r.size_bytes ?? 0), 0);
+      return {
+        main: main.count ?? 0,
+        contrib: contrib.count ?? 0,
+        albums: albums.count ?? 0,
+        bytes,
+      };
+    },
+  });
 }
 
+const cards = [
+  {
+    to: "/photos",
+    title: "Main Photos",
+    body: "The official family library, organised by events and albums.",
+    icon: Images,
+    adminOnly: false,
+  },
+  {
+    to: "/contributions",
+    title: "Family Contributions",
+    body: "Add your own favourites and see everyone else's.",
+    icon: Heart,
+    adminOnly: false,
+  },
+  {
+    to: "/uploads",
+    title: "Admin Uploads",
+    body: "Bulk-upload the main library with resumable transfers.",
+    icon: UploadCloud,
+    adminOnly: true,
+  },
+] as const;
+
+function HomePage() {
+  const { isAdmin } = useAuth();
+  const { data } = useStats();
+
+  return (
+    <AppShell>
+      <PageHeading
+        title="Our family album"
+        description="Every photo we've kept, in one warm place. Browse, download originals, or add your own — no sign-in needed."
+      />
+
+      <div className="mb-10 grid grid-cols-2 gap-3 md:grid-cols-4">
+        {[
+          { label: "Main photos", value: data?.main ?? "—" },
+          { label: "Contributions", value: data?.contrib ?? "—" },
+          { label: "Albums", value: data?.albums ?? "—" },
+          { label: "Stored", value: data ? formatBytes(data.bytes) : "—" },
+        ].map((s) => (
+          <Card key={s.label} className="border-border/70 shadow-soft">
+            <CardContent className="p-5">
+              <p className="font-display text-2xl font-semibold">{s.value}</p>
+              <p className="mt-1 text-xs uppercase tracking-wide text-muted-foreground">
+                {s.label}
+              </p>
+            </CardContent>
+          </Card>
+        ))}
+      </div>
+
+      <div className="grid gap-4 sm:grid-cols-2">
+        {cards
+          .filter((c) => !c.adminOnly || isAdmin)
+          .map((c) => (
+            <Link
+              key={c.to}
+              to={c.to}
+              className="group rounded-2xl border border-border/70 bg-card p-6 shadow-soft transition-all hover:-translate-y-0.5 hover:shadow-lift"
+            >
+              <span className="mb-4 inline-flex size-11 items-center justify-center rounded-xl bg-accent text-accent-foreground">
+                <c.icon className="size-5" />
+              </span>
+              <h2 className="font-display text-xl font-semibold">{c.title}</h2>
+              <p className="mt-1.5 text-sm text-muted-foreground">{c.body}</p>
+            </Link>
+          ))}
+      </div>
+    </AppShell>
+  );
+}
