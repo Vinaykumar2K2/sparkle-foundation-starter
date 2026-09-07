@@ -12,7 +12,7 @@ import { cn } from "@/lib/utils";
 
 const PAGE_SIZE = 48;
 
-export const Route = createFileRoute("/_authenticated/photos")({
+export const Route = createFileRoute("/photos")({
   head: () => ({
     meta: [
       { title: "Main Photos — Family Photo Hub" },

@@ -9,7 +9,7 @@ import { Uploader } from "@/components/Uploader";
 import { downloadOriginal } from "@/lib/storage";
 import { useAuth } from "@/hooks/useAuth";
 
-export const Route = createFileRoute("/_authenticated/contributions")({
+export const Route = createFileRoute("/contributions")({
   head: () => ({
     meta: [
       { title: "Family Contributions — Family Photo Hub" },
