@@ -31,7 +31,7 @@ jobs:
         env:
           # Repository → Settings → Secrets and variables → Actions → Variables.
           # These are publishable, client-side values (never the service role key).
-          PAGES_BASE: /family-photo-hub/
+          PAGES_BASE: /sparkle-foundation-starter/
           VITE_SUPABASE_URL: ${{ vars.VITE_SUPABASE_URL }}
           VITE_SUPABASE_PUBLISHABLE_KEY: ${{ vars.VITE_SUPABASE_PUBLISHABLE_KEY }}
           VITE_SUPABASE_PROJECT_ID: ${{ vars.VITE_SUPABASE_PROJECT_ID }}
