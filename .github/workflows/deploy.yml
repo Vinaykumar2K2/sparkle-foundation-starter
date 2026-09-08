@@ -29,12 +29,9 @@ jobs:
 
       - name: Build static site
         env:
-          # Repository → Settings → Secrets and variables → Actions → Variables.
-          # These are publishable, client-side values (never the service role key).
+          # The repository already contains the publishable VITE_SUPABASE_* values
+          # used by the static client. Do not override them with empty Actions vars.
           PAGES_BASE: /sparkle-foundation-starter/
-          VITE_SUPABASE_URL: ${{ vars.VITE_SUPABASE_URL }}
-          VITE_SUPABASE_PUBLISHABLE_KEY: ${{ vars.VITE_SUPABASE_PUBLISHABLE_KEY }}
-          VITE_SUPABASE_PROJECT_ID: ${{ vars.VITE_SUPABASE_PROJECT_ID }}
         run: bun run build:pages
 
       - uses: actions/configure-pages@v5
