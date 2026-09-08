@@ -30,3 +30,11 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
+
+# Local environment (Supabase values are provided as GitHub Actions variables)
+.env
+.env.*
+!.env.example
+
+# Never commit photos or other large media — they live in Supabase Storage
+*.zip
